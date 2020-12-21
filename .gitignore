@@ -2,4 +2,4 @@
 .gradle/
 build/
 
-/Keys.java
+src/main/java/Keys.java
