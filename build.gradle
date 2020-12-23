@@ -14,6 +14,7 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
     compile "net.jacobpeterson:alpaca-java:6.0.1"
     compile 'pl.zankowski:iextrading4j-all:3.3.4'
+    compile "com.barchart.base:barchart-ondemand-client:2.0.2"
 }
 
 test {
