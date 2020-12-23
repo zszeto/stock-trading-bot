@@ -8,9 +8,9 @@ public class Trading {
 
     private static final String key = Keys.alpacaKeyID;
     private static final String secretKey = Keys.alpacaKeyID;
-    AlpacaAPI alpacaAPI = new AlpacaAPI(key, secretKey, "https://paper-api.alpaca.markets");
+    static AlpacaAPI alpacaAPI = new AlpacaAPI(key, secretKey, "https://paper-api.alpaca.markets");
 
-    public void autoBuy(String symbol, int amount) throws Exception {
+    public static void autoBuy(String symbol, int amount) throws Exception {
         double fiveDaySMA = CheckPrice.fiveDaySMA(symbol);
         double hundredDaySMA = CheckPrice.hundredDaySMA(symbol);
 
@@ -19,7 +19,7 @@ public class Trading {
         }
     }
 
-    public void autoSell(String symbol) throws Exception {
+    public static void autoSell(String symbol) throws Exception {
         double fiveDaySMA = CheckPrice.fiveDaySMA(symbol);
         double hundredDaySMA = CheckPrice.hundredDaySMA(symbol);
 
