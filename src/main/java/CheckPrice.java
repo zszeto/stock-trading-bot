@@ -10,10 +10,7 @@ import pl.zankowski.iextrading4j.client.IEXCloudTokenBuilder;
 import pl.zankowski.iextrading4j.client.IEXTradingClient;
 import pl.zankowski.iextrading4j.client.rest.request.stocks.QuoteRequestBuilder;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class CheckPrice {
     public static double checkPrice(String symbol) {
@@ -28,21 +25,10 @@ public class CheckPrice {
         AlphaVantageConnector apiConnector = new AlphaVantageConnector(alphaVantageKey, timeout);
         TechnicalIndicators technicalIndicators = new TechnicalIndicators(apiConnector);
 
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        LocalDateTime now = LocalDateTime.now();
-
-        SMA response = technicalIndicators.sma(symbol, Interval.SIXTY_MIN, TimePeriod.of(1200), SeriesType.CLOSE);
+        SMA response = technicalIndicators.sma(symbol, Interval.DAILY, TimePeriod.of(50), SeriesType.CLOSE);
         List<IndicatorData> indicatorData = response.getData();
 
-        AtomicReference<Double> sma = new AtomicReference<>((double) 0);
-
-        indicatorData.forEach(data -> {
-            if (dtf.format(now).equals(data.getDateTime().toString())) {
-                sma.set(data.getData());
-            }
-        });
-
-        double fiftyDaySMA = sma.get();
+        double fiftyDaySMA = indicatorData.get(0).getData();
         return fiftyDaySMA;
     }
 }
