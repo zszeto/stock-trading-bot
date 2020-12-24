@@ -11,22 +11,22 @@ public class Trading {
     static AlpacaAPI alpacaAPI = new AlpacaAPI(key, secretKey, "https://paper-api.alpaca.markets");
 
     public static void autoBuy(String symbol, int amount) throws Exception {
-        double fiveDaySMA = CheckPrice.fiveDaySMA(symbol);
-        double hundredDaySMA = CheckPrice.hundredDaySMA(symbol);
+        double fiftyDaySMA = CheckPrice.fiftyDaySMA(symbol);
+        double currentPrice = CheckPrice.checkPrice(symbol);
 
-        if (fiveDaySMA>hundredDaySMA) {
+        if (currentPrice>fiftyDaySMA) {
             Buy.marketBuy(symbol, amount, OrderTimeInForce.DAY);
         }
     }
 
     public static void autoSell(String symbol) throws Exception {
-        double fiveDaySMA = CheckPrice.fiveDaySMA(symbol);
-        double hundredDaySMA = CheckPrice.hundredDaySMA(symbol);
+        double fiftyDaySMA = CheckPrice.fiftyDaySMA(symbol);
+        double currentPrice = CheckPrice.checkPrice(symbol);
 
         Position position = alpacaAPI.getOpenPositionBySymbol(symbol);
         int amount = parseInt(position.getQty());
 
-        if (fiveDaySMA<hundredDaySMA) {
+        if (currentPrice<fiftyDaySMA) {
             Sell.marketSell(symbol, amount, OrderTimeInForce.DAY);
         }
     }

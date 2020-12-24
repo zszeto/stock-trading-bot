@@ -1,58 +1,48 @@
-import com.barchart.ondemand.BarchartOnDemandClient;
-import com.barchart.ondemand.api.TechnicalsRequest;
-import com.barchart.ondemand.api.TechnicalsRequestField;
-import com.barchart.ondemand.api.responses.Technical;
-import com.barchart.ondemand.api.responses.Technicals;
+import org.patriques.AlphaVantageConnector;
+import org.patriques.TechnicalIndicators;
+import org.patriques.input.technicalindicators.Interval;
+import org.patriques.input.technicalindicators.SeriesType;
+import org.patriques.input.technicalindicators.TimePeriod;
+import org.patriques.output.technicalindicators.SMA;
+import org.patriques.output.technicalindicators.data.IndicatorData;
+import pl.zankowski.iextrading4j.client.IEXCloudClient;
+import pl.zankowski.iextrading4j.client.IEXCloudTokenBuilder;
 import pl.zankowski.iextrading4j.client.IEXTradingClient;
-import pl.zankowski.iextrading4j.client.rest.request.stocks.PriceRequestBuilder;
+import pl.zankowski.iextrading4j.client.rest.request.stocks.QuoteRequestBuilder;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class CheckPrice {
     public static double checkPrice(String symbol) {
-        IEXTradingClient iexTradingClient = (IEXTradingClient) IEXTradingClient.create();
-        double price = iexTradingClient.executeRequest(new PriceRequestBuilder().withSymbol(symbol).build()).doubleValue();
+        IEXCloudClient cloudClient = IEXTradingClient.create(new IEXCloudTokenBuilder().withPublishableToken(Keys.iexPublic).withSecretToken(Keys.iexPrivate).build());
+        double price = cloudClient.executeRequest(new QuoteRequestBuilder().withSymbol(symbol).build()).getLatestPrice().doubleValue();
         return price;
     }
-    public static double fiveDaySMA(String symbol) throws Exception {
-        BarchartOnDemandClient onDemand = new BarchartOnDemandClient.Builder().build();
-        final TechnicalsRequest.Builder builder = new TechnicalsRequest.Builder();
 
-        String[] symbolsArray = {symbol};
+    public static double fiftyDaySMA(String symbol) throws Exception {
+        String alphaVantageKey = Keys.alphaVantageKey;
+        int timeout = 3000;
+        AlphaVantageConnector apiConnector = new AlphaVantageConnector(alphaVantageKey, timeout);
+        TechnicalIndicators technicalIndicators = new TechnicalIndicators(apiConnector);
 
-        builder.symbols(symbolsArray);
-        builder.fields(TechnicalsRequestField.all());
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDateTime now = LocalDateTime.now();
 
-        final Technicals results = (Technicals) onDemand.fetch(builder.build());
+        SMA response = technicalIndicators.sma(symbol, Interval.SIXTY_MIN, TimePeriod.of(1200), SeriesType.CLOSE);
+        List<IndicatorData> indicatorData = response.getData();
 
-        double[] fiveDayMovingAverageList = new double[symbolsArray.length];
+        AtomicReference<Double> sma = new AtomicReference<>((double) 0);
 
-        for (Technical q : results.all()) {
-            fiveDayMovingAverageList[0] = q.getMovingAverageFiveDay();
-        }
+        indicatorData.forEach(data -> {
+            if (dtf.format(now).equals(data.getDateTime().toString())) {
+                sma.set(data.getData());
+            }
+        });
 
-        double sma = fiveDayMovingAverageList[0];
-
-   return sma;
-    }
-
-    public static double hundredDaySMA(String symbol) throws Exception {
-        BarchartOnDemandClient onDemand = new BarchartOnDemandClient.Builder().build();
-        final TechnicalsRequest.Builder builder = new TechnicalsRequest.Builder();
-
-        String[] symbolsArray = {symbol};
-
-        builder.symbols(symbolsArray);
-        builder.fields(TechnicalsRequestField.all());
-
-        final Technicals results = (Technicals) onDemand.fetch(builder.build());
-
-        double[] hundredDayMovingAverageList = new double[symbolsArray.length];
-
-        for (Technical q : results.all()) {
-            hundredDayMovingAverageList[0] = q.getMovingAverageFiveDay();
-        }
-
-        double sma = hundredDayMovingAverageList[0];
-
-        return sma;
+        double fiftyDaySMA = sma.get();
+        return fiftyDaySMA;
     }
 }

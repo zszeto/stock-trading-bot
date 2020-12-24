@@ -5,7 +5,7 @@ import static java.lang.Double.parseDouble;
 
 public class AccountInfo {
     private static final String key = Keys.alpacaKeyID;
-    private static final String secretKey = Keys.alpacaKeyID;
+    private static final String secretKey = Keys.alpacaSecretKey;
 
     private static final AlpacaAPI alpacaAPI = new AlpacaAPI(key, secretKey, "https://paper-api.alpaca.markets");
 
